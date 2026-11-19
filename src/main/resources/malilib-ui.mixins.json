@@ -1,0 +1,38 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.github.bunnyi116.malilibui.mixin",
+  "compatibilityLevel": "${compatibility_level}",
+  "mixins": [],
+  "client": [
+    "GuiBaseMixin",
+    "GuiConfigsBaseMixin",
+    "GuiListBaseMixin",
+    "GuiScrollBarMixin",
+    "MinecraftMixin",
+    "WidgetConfigOptionBaseMixin",
+    "WidgetConfigOptionMixin",
+    "WidgetListBaseMixin",
+    "WidgetListConfigOptionsMixin",
+    "WidgetDropDownListMixin",
+    "WidgetSliderMixin",
+    "accessor.ButtonBaseAccessor",
+    "accessor.GuiBaseAccessor",
+    "accessor.GuiConfigsBaseAccessor",
+    "accessor.GuiListBaseAccessor",
+    "accessor.GuiScrollBarAccessor",
+    "accessor.WidgetDropDownListAccessor",
+    "accessor.WidgetListBaseAccessor",
+    "accessor.WidgetListConfigOptionsBaseAccessor",
+    "accessor.WidgetListEntryBaseAccessor",
+    "accessor.WidgetSliderAccessor",
+    "dialog.GuiColorListEditMixin",
+    "dialog.GuiKeybindSettingsMixin",
+    "dialog.GuiLockedListEditMixin",
+    "dialog.GuiStringListEditMixin",
+    "dialog.GuiTableEditMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

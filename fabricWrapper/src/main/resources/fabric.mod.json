@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_wrapper_id}",
+  "version": "${mod_version}",
+  "icon": "assets/${mod_wrapper_id}/icon.png",
+  "name": "${mod_name} - Version Pack",
+  "description": "${mod_description}",
+  "authors": [
+    {
+      "name": "bunnyi116",
+      "contact": {
+        "homepage": "https://github.com/bunnyi116"
+      }
+    }
+  ],
+  "contact": {
+    "homepage": "${mod_homepage}",
+    "issues": "${mod_sources}/issues",
+    "sources": "${mod_sources}"
+  },
+  "license": "${mod_license}",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.github.bunnyi116.malilibui.wrapper.Mod"
+    ]
+  },
+  "depends": {
+    "minecraft": "*",
+    "malilib": "*"
+  }
+}

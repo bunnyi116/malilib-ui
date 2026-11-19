@@ -1,0 +1,55 @@
+name: build
+on:
+  push:
+    paths-ignore: [ '*.md' ]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  IS_THIS_RELEASE: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Validate gradle wrapper
+        uses: gradle/actions/wrapper-validation@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ./.gradle
+          key: ${{ runner.os }}-gradle-common
+          restore-keys: |
+            ${{ runner.os }}-gradle-common
+
+      - name: Make gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Build malilib-ui version pack
+        run: ./gradlew :fabricWrapper:build --stacktrace
+
+      - name: Capture versionpack
+        uses: actions/upload-artifact@v7
+        with:
+          name: malilib-ui-versionpack
+          path: fabricWrapper/build/libs/*.jar
+          archive: false
+
+      - name: Capture standalone version JARs
+        uses: actions/upload-artifact@v7
+        with:
+          name: malilib-ui-version-jars
+          path: fabricWrapper/build/libs/jars/
