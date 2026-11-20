@@ -24,7 +24,7 @@ preprocess {
 //    val mc12105 = createNode("1.21.5", 1_21_05, "")
 //    val mc12106 = createNode("1.21.6", 1_21_06, "")
 //    val mc12109 = createNode("1.21.9", 1_21_09, "")
-//    val mc12111 = createNode("1.21.11", 1_21_11, "")
+    val mc12111 = createNode("1.21.11", 1_21_11, "")
     val mc260100 = createNode("26.1", 26_01_00, null)
     val mc260200 = createNode("26.2", 26_02_00, null)
     val mc260300 = createNode("26.3", 26_03_00, null)
@@ -41,7 +41,7 @@ preprocess {
 //    mc12105.link(mc12106, null)
 //    mc12106.link(mc12109, null)
 //    mc12109.link(mc12111, file("versions/mapping-1.21.10-1.21.11.txt"))
-//    mc12111.link(mc260100, file("versions/mapping-1.21.11-26.1.txt"))
+    mc12111.link(mc260100, file("versions/mapping-1.21.11-26.1.txt"))
     mc260100.link(mc260200, file("versions/mapping-26.1.2-26.2.txt"))
     mc260200.link(mc260300, null)
 

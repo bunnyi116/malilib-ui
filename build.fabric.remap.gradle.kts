@@ -13,6 +13,12 @@ version = fullProjectVersion
 group = modMavenGroup
 
 repositories {
+    // Optional local mirror for environments where the Modrinth CDN is
+    // unreliable. It is ignored by git and is not required for normal builds.
+    val localMirror = rootProject.file(".m2repo")
+    if (localMirror.isDirectory) {
+        maven { url = uri(localMirror) }
+    }
     fun strictMaven(url: String, vararg groups: String) = exclusiveContent {
         forRepository { maven(url) }
         filter {
@@ -42,6 +48,7 @@ dependencies {
     mappings(loom.officialMojangMappings())
     modImplementation("net.fabricmc:fabric-loader:$fabricLoaderVersion")
     modImplementation("maven.modrinth:malilib:$malilib")
+    modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${prop("fabric_api")}")
 }
 
 loom {

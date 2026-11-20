@@ -4,15 +4,19 @@ import com.github.bunnyi116.malilibui.MalilibUiMod;
 import com.github.bunnyi116.malilibui.api.ConfigFactory;
 import com.github.bunnyi116.malilibui.api.config.*;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import fi.dy.masa.malilib.MaLiLib;
 import fi.dy.masa.malilib.config.ConfigUtils;
 import fi.dy.masa.malilib.config.IConfigBase;
 import fi.dy.masa.malilib.config.IConfigHandler;
 import fi.dy.masa.malilib.util.FileUtils;
-import fi.dy.masa.malilib.util.data.json.JsonUtils;
 
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -62,6 +66,18 @@ public class UiConfigs implements IConfigHandler {
                 GROUP.integer("sidebarWidth")
                         .defaultValue(130)
                         .range(90, 260)
+                        .build();
+
+        /** 左上角徽章文字；留空则回退到默认文字。 */
+        public static final UiConfigString BADGE_TEXT =
+                GROUP.string("badgeText")
+                        .defaultValue("MaLiLib UI")
+                        .build();
+
+        /** 左上角徽章图标路径；支持绝对路径，或相对 malilib 配置目录。 */
+        public static final UiConfigString BADGE_ICON =
+                GROUP.string("badgeIcon")
+                        .defaultValue("")
                         .build();
     }
 
@@ -241,8 +257,8 @@ public class UiConfigs implements IConfigHandler {
             return;
         }
 
-        try {
-            JsonElement element = JsonUtils.parseJsonFile(configFile);
+        try (Reader reader = Files.newBufferedReader(configFile)) {
+            JsonElement element = JsonParser.parseReader(reader);
 
             if (element != null && element.isJsonObject()) {
                 JsonObject root = element.getAsJsonObject();
@@ -264,7 +280,12 @@ public class UiConfigs implements IConfigHandler {
         if (Files.isDirectory(dir)) {
             JsonObject root = new JsonObject();
             ConfigUtils.writeConfigBase(root, "Generic", OPTIONS);
-            JsonUtils.writeJsonToFile(root, dir.resolve(CONFIG_FILE_NAME));
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            try (Writer writer = Files.newBufferedWriter(dir.resolve(CONFIG_FILE_NAME))) {
+                gson.toJson(root, writer);
+            } catch (Exception e) {
+                MaLiLib.LOGGER.error("Failed to save malilib-ui configs to '{}'", dir, e);
+            }
         }
     }
 }
