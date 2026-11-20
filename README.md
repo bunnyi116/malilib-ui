@@ -1,5 +1,5 @@
 > [!NOTE]
-> 当前版本已实现核心功能（左侧 TAB + 右侧选项的重制配置界面），支持 Minecraft 26.1 / 26.2 / 26.3，欢迎反馈问题与建议。
+> 当前版本已实现核心功能（左侧 TAB + 右侧选项的重制配置界面），支持 Minecraft 26.1 / 26.2 / 26.3 与 1.21.11，欢迎反馈问题与建议。
 
 MaLiLib UI
 ==================
@@ -20,12 +20,15 @@ Scroller 等）都会自动获得新的界面布局。
 
 | Minecraft | MaLiLib | 状态                  |
 |-----------|---------|-----------------------|
+| 1.21.11   | 0.27.20 | 已支持 / 1.21.x 验证版本 |
 | 26.1      | 0.28.9  | 已支持                |
 | 26.2      | 0.29.3  | 已支持                |
 | 26.3      | 0.30.1  | 已支持 / 主力验证版本 |
 
-> 更早的 Minecraft 版本暂不支持（构建脚本中保留了旧版本配置的注释，便于后续回补）。
-> 三个版本的目标 GUI 类字段/方法签名集合一致，一套 mixin 通用，无需版本分支。
+> 1.21–1.21.10 暂不支持。这些版本的 MaLiLib 仍使用 `DrawContext`，且 1.21.1–1.21.8 的
+> `RenderUtils` / `GuiBase.drawButtons` 签名各不相同；本模组的绘制层基于 1.21.11 引入的
+> `GuiContext`，回补到旧版本需要重写整个绘制层并为每个版本拆分分支。
+> 26.x 与 1.21.11 的 GUI 类字段/方法签名集合一致，仅在渲染方法入口上做一处版本分支。
 
 前置模组
 ----------
@@ -96,8 +99,8 @@ Scroller 等）都会自动获得新的界面布局。
 
 | 注入点                                                   | 作用                                                                  |
 |----------------------------------------------------------|-----------------------------------------------------------------------|
-| `GuiBase.init` TAIL / `extractRenderState` HEAD          | 每帧确保布局已应用（TAB 切换是直接调用 `initGui()`，不经过 `init()`） |
-| `GuiBase.extractRenderState` TAIL                        | 帧末重绘展开的 mod 切换下拉框，避免被配置列表遮挡                     |
+| `GuiBase.initGui` TAIL / `drawScreenBackground` HEAD       | 确保布局已应用（TAB 切换直接调用 `initGui()`，不经过 `init()`） |
+| `GuiBase.drawHoveredWidget` TAIL                          | 内容绘制完之后重绘展开的 mod 切换下拉框，避免被配置列表遮挡 |
 | `GuiBase.drawScreenBackground` HEAD（cancel）            | 绘制新面板背景、侧栏、内容区、标题、装饰线                            |
 | `GuiBase.drawTitle` HEAD（cancel）                       | 由新布局自行绘制标题                                                  |
 | `GuiBase.drawButtons` Redirect                           | 把原 TAB 按钮绘制为左侧导航项（按钮对象与点击回调保持原样）           |
@@ -140,8 +143,9 @@ MalilibUiApi.setGroupCollapsed("litematica", "通用", true);
 构建
 ----------
 
-项目使用 Gradle（wrapper 已包含）与 JDK 25 工具链，多版本源码由 preprocessor 从根目录 `src/main/` 分发到
-`versions/<mcver>/`。
+项目使用 Gradle（wrapper 已包含），运行 Gradle 需要 JDK 25（Fabric Loom 1.19 的要求）；
+编译目标由 `mod-plugin` 按 Minecraft 版本自动选择，1.21.11 为 Java 21，26.x 为 Java 25。
+多版本源码由 preprocessor 从根目录 `src/main/` 分发到 `versions/<mcver>/`。
 
 ```bash
 # 构建单个版本（产物：versions/26.3/build/libs/）

@@ -60,6 +60,7 @@ fabric.properties
 **/build/
 **/run/
 **/libs/
+.m2repo/
 
 # 跨平台系统临时文件
 # macOS

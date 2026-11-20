@@ -1,5 +1,6 @@
 package com.github.bunnyi116.malilibui.gui;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -313,7 +314,45 @@ public final class ConfigScreenManager {
         applyNavLayout(configs, state);
         ensureList(configs, state);
         ensureModSwitcher(configs, state);
+        positionExtraDropdowns(configs, state);
         state.ready = true;
+    }
+
+    /**
+     * 部分模组会在配置界面里额外添加排序/筛选下拉框。它们原本按屏幕坐标硬编码，
+     * 重制布局后会被挤到面板外；这里统一按内容区右边缘重新摆放。
+     * 26.x 保持原行为不动。
+     */
+    private static void positionExtraDropdowns(GuiConfigsBase configs, ConfigScreenState state) {
+        if (is26x()) {
+            return;
+        }
+
+        ConfigLayout layout = state.layout;
+        WidgetDropDownList<ModInfo> switcher = ((GuiConfigsBaseAccessor) configs).malilibui$getModSwitchWidget();
+        List<WidgetDropDownList<?>> extras = new ArrayList<>();
+
+        for (WidgetBase widget : ((GuiBaseAccessor) configs).malilibui$getWidgets()) {
+            if (widget instanceof WidgetDropDownList<?> dropdown && dropdown != switcher) {
+                extras.add(dropdown);
+            }
+        }
+
+        if (extras.isEmpty()) {
+            return;
+        }
+
+        int right = switcher != null ? switcher.getX() + switcher.getWidth()
+                : layout.contentX + layout.contentW - 22;
+        int y = layout.listY + 8;
+
+        for (int i = extras.size() - 1; i >= 0; --i) {
+            WidgetDropDownList<?> dropdown = extras.get(i);
+            int width = dropdown.getWidth();
+            right -= width;
+            dropdown.setPosition(Math.max(layout.contentX + 8, right), y);
+            right -= 4;
+        }
     }
 
     private static void ensureRenderLayerLayout(GuiBase screen) {
@@ -387,6 +426,15 @@ public final class ConfigScreenManager {
     private static boolean hasModSwitcher(ConfigScreenState state) {
         return state.screen instanceof GuiConfigsBase configs &&
                 ((GuiConfigsBaseAccessor) configs).malilibui$getModSwitchWidget() != null;
+    }
+
+    static boolean is26x() {
+        try {
+            Class.forName("net.minecraft.client.gui.GuiGraphicsExtractor");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     private static boolean isTabButton(ButtonBase button) {
@@ -568,14 +616,26 @@ public final class ConfigScreenManager {
         UiTheme.vline(ctx, layout.sidebarX + layout.sidebarW, layout.sidebarY, layout.sidebarH,
                 UiTheme.SIDEBAR_DIVIDER);
 
-        // 标题区。
-        UiTheme.fill(ctx, layout.sidebarX + 12, layout.sidebarY + 16, 3, 14, UiTheme.TEXT_ACCENT);
-        UiTheme.text(ctx, UiTheme.trim(ctx.fontRenderer(), modName, layout.sidebarW - 40),
-                layout.sidebarX + 21, layout.sidebarY + 19, UiTheme.TEXT_TITLE, true);
-        UiTheme.text(ctx, "MaLiLib UI", layout.sidebarX + 21, layout.sidebarY + 33,
-                UiTheme.TEXT_SUB, false);
+        // 徽章与标题区：1.21.11 使用可自定义徽章；26.x 保持上游原样。
+        if (is26x()) {
+            UiTheme.fill(ctx, layout.sidebarX + 12, layout.sidebarY + 16, 3, 14, UiTheme.TEXT_ACCENT);
+            UiTheme.text(ctx, UiTheme.trim(ctx.fontRenderer(), modName, layout.sidebarW - 40),
+                    layout.sidebarX + 21, layout.sidebarY + 19, UiTheme.TEXT_TITLE, true);
+            UiTheme.text(ctx, "MaLiLib UI", layout.sidebarX + 21, layout.sidebarY + 33,
+                    UiTheme.TEXT_SUB, false);
 
-        UiTheme.hline(ctx, layout.sidebarX + 12, layout.sidebarY + 48, layout.sidebarW - 24,
+            UiTheme.hline(ctx, layout.sidebarX + 12, layout.sidebarY + 48, layout.sidebarW - 24,
+                    0x22FFFFFF);
+            return;
+        }
+
+        BadgeRenderer.draw(ctx, layout.sidebarX + 10, layout.sidebarY + 8,
+                Math.max(40, layout.sidebarW - 20));
+
+        UiTheme.text(ctx, UiTheme.trim(ctx.fontRenderer(), modName, layout.sidebarW - 24),
+                layout.sidebarX + 12, layout.sidebarY + 47, UiTheme.TEXT_TITLE, true);
+
+        UiTheme.hline(ctx, layout.sidebarX + 12, layout.sidebarY + 66, layout.sidebarW - 24,
                 0x22FFFFFF);
     }
 

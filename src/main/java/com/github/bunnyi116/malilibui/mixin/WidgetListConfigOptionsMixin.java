@@ -12,6 +12,7 @@ import fi.dy.masa.malilib.gui.GuiConfigsBase.ConfigOptionWrapper;
 import fi.dy.masa.malilib.gui.widgets.WidgetListConfigOptions;
 
 import com.github.bunnyi116.malilibui.mixin.accessor.WidgetListBaseAccessor;
+import com.github.bunnyi116.malilibui.mixin.accessor.WidgetListConfigOptionsBaseAccessor;
 
 /**
  * 固定配置列表中“名称列”的宽度。
@@ -41,6 +42,27 @@ public abstract class WidgetListConfigOptionsMixin {
             }
         }
 
-        return list.getMaxNameLengthWrapped(wrappers);
+        int labelWidth = list.getMaxNameLengthWrapped(wrappers);
+
+        // 26.x 保持原行为不动；1.21.11 限制标签宽度，避免长名称把
+        // 配置控件和“重置”按钮顶出内容面板右侧。
+        if (is26x()) {
+            return labelWidth;
+        }
+
+        int entryWidth = ((WidgetListBaseAccessor) list).malilibui$getBrowserEntryWidth();
+        int configWidth = ((WidgetListConfigOptionsBaseAccessor) list).malilibui$getConfigWidth();
+        int maxLabelWidth = Math.max(40, entryWidth - configWidth - 54);
+
+        return Math.min(labelWidth, maxLabelWidth);
+    }
+
+    private static boolean is26x() {
+        try {
+            Class.forName("net.minecraft.client.gui.GuiGraphicsExtractor");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 }
